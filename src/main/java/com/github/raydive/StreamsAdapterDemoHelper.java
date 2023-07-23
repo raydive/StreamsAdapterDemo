@@ -1,17 +1,17 @@
-package com.github.raydive;
-/**
- * Copyright 2010-2019 Amazon.com, Inc. or its affiliates. All Rights Reserved.
- *
- * This file is licensed under the Apache License, Version 2.0 (the "License").
- * You may not use this file except in compliance with the License. A copy of
- * the License is located at
- *
- * http://aws.amazon.com/apache2.0/
- *
- * This file is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR
- * CONDITIONS OF ANY KIND, either express or implied. See the License for the
- * specific language governing permissions and limitations under the License.
+/*
+  Copyright 2010-2019 Amazon.com, Inc. or its affiliates. All Rights Reserved.
+
+  This file is licensed under the Apache License, Version 2.0 (the "License").
+  You may not use this file except in compliance with the License. A copy of
+  the License is located at
+
+  http://aws.amazon.com/apache2.0/
+
+  This file is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR
+  CONDITIONS OF ANY KIND, either express or implied. See the License for the
+  specific language governing permissions and limitations under the License.
  */
+package com.github.raydive;
 
 import com.amazonaws.client.builder.AwsClientBuilder;
 import com.amazonaws.services.dynamodbv2.AmazonDynamoDB;
@@ -68,7 +68,7 @@ public class StreamsAdapterDemoHelper {
     }
 
     public static void putItem(AmazonDynamoDB dynamoDBClient, String tableName, String id, String val) {
-        java.util.Map<String, AttributeValue> item = new HashMap<String, AttributeValue>();
+        var item = new HashMap<String, AttributeValue>();
         item.put("Id", new AttributeValue().withN(id));
         item.put("attribute-1", new AttributeValue().withS(val));
 
@@ -77,16 +77,16 @@ public class StreamsAdapterDemoHelper {
     }
 
     public static void putItem(AmazonDynamoDB dynamoDBClient, String tableName,
-                               java.util.Map<String, AttributeValue> items) {
+                               Map<String, AttributeValue> items) {
         PutItemRequest putItemRequest = new PutItemRequest().withTableName(tableName).withItem(items);
         dynamoDBClient.putItem(putItemRequest);
     }
 
     public static void updateItem(AmazonDynamoDB dynamoDBClient, String tableName, String id, String val) {
-        java.util.Map<String, AttributeValue> key = new HashMap<String, AttributeValue>();
+        var key = new HashMap<String, AttributeValue>();
         key.put("Id", new AttributeValue().withN(id));
 
-        Map<String, AttributeValueUpdate> attributeUpdates = new HashMap<String, AttributeValueUpdate>();
+        var attributeUpdates = new HashMap<String, AttributeValueUpdate>();
         AttributeValueUpdate update = new AttributeValueUpdate().withAction(AttributeAction.PUT)
                 .withValue(new AttributeValue().withS(val));
         attributeUpdates.put("attribute-2", update);
@@ -97,7 +97,7 @@ public class StreamsAdapterDemoHelper {
     }
 
     public static void deleteItem(AmazonDynamoDB dynamoDBClient, String tableName, String id) {
-        java.util.Map<String, AttributeValue> key = new HashMap<String, AttributeValue>();
+        var key = new HashMap<String, AttributeValue>();
         key.put("Id", new AttributeValue().withN(id));
 
         DeleteItemRequest deleteItemRequest = new DeleteItemRequest().withTableName(tableName).withKey(key);

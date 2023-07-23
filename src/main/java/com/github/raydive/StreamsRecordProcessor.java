@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright 2010-2019 Amazon.com, Inc. or its affiliates. All Rights Reserved.
  *
  * This file is licensed under the Apache License, Version 2.0 (the "License").
@@ -50,14 +50,10 @@ public class StreamsRecordProcessor implements IRecordProcessor {
                         .getInternalObject();
 
                 switch (streamRecord.getEventName()) {
-                    case "INSERT":
-                    case "MODIFY":
-                        StreamsAdapterDemoHelper.putItem(dynamoDBClient, tableName,
-                                streamRecord.getDynamodb().getNewImage());
-                        break;
-                    case "REMOVE":
-                        StreamsAdapterDemoHelper.deleteItem(dynamoDBClient, tableName,
-                                streamRecord.getDynamodb().getKeys().get("Id").getN());
+                    case "INSERT", "MODIFY" -> StreamsAdapterDemoHelper.putItem(dynamoDBClient, tableName,
+                            streamRecord.getDynamodb().getNewImage());
+                    case "REMOVE" -> StreamsAdapterDemoHelper.deleteItem(dynamoDBClient, tableName,
+                            streamRecord.getDynamodb().getKeys().get("Id").getN());
                 }
             }
             checkpointCounter += 1;

@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright 2010-2019 Amazon.com, Inc. or its affiliates. All Rights Reserved.
  *
  * This file is licensed under the Apache License, Version 2.0 (the "License").
@@ -11,13 +11,10 @@
  * CONDITIONS OF ANY KIND, either express or implied. See the License for the
  * specific language governing permissions and limitations under the License.
  */
-
-
 package com.github.raydive;
 
 import com.amazonaws.auth.AWSCredentialsProvider;
 import com.amazonaws.auth.DefaultAWSCredentialsProviderChain;
-import com.amazonaws.regions.Regions;
 import com.amazonaws.services.cloudwatch.AmazonCloudWatch;
 import com.amazonaws.services.cloudwatch.AmazonCloudWatchClientBuilder;
 import com.amazonaws.services.dynamodbv2.AmazonDynamoDB;
@@ -34,21 +31,12 @@ import com.amazonaws.services.kinesis.clientlibrary.lib.worker.KinesisClientLibC
 import com.amazonaws.services.kinesis.clientlibrary.lib.worker.Worker;
 
 public class StreamsAdapterDemo {
-    private static Worker worker;
-    private static KinesisClientLibConfiguration workerConfig;
-    private static IRecordProcessorFactory recordProcessorFactory;
-
     private static AmazonDynamoDB dynamoDBClient;
-    private static AmazonCloudWatch cloudWatchClient;
-    private static AmazonDynamoDBStreams dynamoDBStreamsClient;
-    private static AmazonDynamoDBStreamsAdapterClient adapterClient;
 
-    private static String tablePrefix = "KCL-Demo";
+    private static final String tablePrefix = "KCL-Demo";
     private static String streamArn;
 
-    private static Regions awsRegion = Regions.US_EAST_2;
-
-    private static AWSCredentialsProvider awsCredentialsProvider = DefaultAWSCredentialsProviderChain.getInstance();
+    private static final AWSCredentialsProvider awsCredentialsProvider = DefaultAWSCredentialsProviderChain.getInstance();
 
     /**
      * @param args
@@ -59,30 +47,29 @@ public class StreamsAdapterDemo {
         dynamoDBClient = AmazonDynamoDBClientBuilder.standard()
                 .withEndpointConfiguration(StreamsAdapterDemoHelper.getDynamoDBEndpointConfiguration())
                 .build();
-        cloudWatchClient = AmazonCloudWatchClientBuilder.standard()
+        AmazonCloudWatch cloudWatchClient = AmazonCloudWatchClientBuilder.standard()
                 .withEndpointConfiguration(StreamsAdapterDemoHelper.getCloudWatchEndpointConfiguration())
                 .build();
-        dynamoDBStreamsClient = AmazonDynamoDBStreamsClientBuilder.standard()
+        AmazonDynamoDBStreams dynamoDBStreamsClient = AmazonDynamoDBStreamsClientBuilder.standard()
                 .withEndpointConfiguration(StreamsAdapterDemoHelper.getDynamoDBStreamsEndpointConfiguration())
                 .build();
-        adapterClient = new AmazonDynamoDBStreamsAdapterClient(dynamoDBStreamsClient);
+        AmazonDynamoDBStreamsAdapterClient adapterClient = new AmazonDynamoDBStreamsAdapterClient(dynamoDBStreamsClient);
         String srcTable = tablePrefix + "-src";
         String destTable = tablePrefix + "-dest";
-        recordProcessorFactory = new StreamsRecordProcessorFactory(dynamoDBClient, destTable);
+        IRecordProcessorFactory recordProcessorFactory = new StreamsRecordProcessorFactory(dynamoDBClient, destTable);
 
         setUpTables();
 
-        workerConfig = new KinesisClientLibConfiguration("streams-adapter-demo",
+        KinesisClientLibConfiguration workerConfig = new KinesisClientLibConfiguration("streams-adapter-demo",
                 streamArn,
                 awsCredentialsProvider,
                 "streams-demo-worker")
-                .withDynamoDBEndpoint("http://localhost:8000")
                 .withMaxRecords(1000)
                 .withIdleTimeBetweenReadsInMillis(500)
                 .withInitialPositionInStream(InitialPositionInStream.TRIM_HORIZON);
 
         System.out.println("Creating worker for stream: " + streamArn);
-        worker = StreamsWorkerFactory.createDynamoDbStreamsWorker(recordProcessorFactory, workerConfig, adapterClient, dynamoDBClient, cloudWatchClient);
+        Worker worker = StreamsWorkerFactory.createDynamoDbStreamsWorker(recordProcessorFactory, workerConfig, adapterClient, dynamoDBClient, cloudWatchClient);
         System.out.println("Starting worker...");
         Thread t = new Thread(worker);
         t.start();
