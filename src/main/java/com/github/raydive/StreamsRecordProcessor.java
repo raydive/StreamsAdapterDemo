@@ -51,7 +51,7 @@ public class StreamsRecordProcessor implements IRecordProcessor {
 
                 switch (streamRecord.getEventName()) {
                     case "INSERT", "MODIFY" -> StreamsAdapterDemoHelper.putItem(dynamoDBClient, tableName,
-                            streamRecord.getDynamodb().getNewImage());
+                            streamRecord.getDynamodb().getNewImage()); // NewImageだけ相手にしたいなら、getNewImage呼び出してよしなに処理すれば良さそう
                     case "REMOVE" -> StreamsAdapterDemoHelper.deleteItem(dynamoDBClient, tableName,
                             streamRecord.getDynamodb().getKeys().get("Id").getN());
                 }
@@ -59,6 +59,8 @@ public class StreamsRecordProcessor implements IRecordProcessor {
             checkpointCounter += 1;
             if (checkpointCounter % 10 == 0) {
                 try {
+                    // ここで10件ずつcheckpointを入れる
+                    // recordからsequence numberを取得できるから、sequence numberでこの辺を処理することになるかな
                     processRecordsInput.getCheckpointer().checkpoint();
                 } catch (Exception e) {
                     e.printStackTrace();
@@ -70,6 +72,10 @@ public class StreamsRecordProcessor implements IRecordProcessor {
 
     @Override
     public void shutdown(ShutdownInput shutdownInput) {
+        // ShutdownReasonは以下の３つが存在する。ZOMBIEはcheckpointを入れないこと(should)
+        // ZOMBIE
+        // TERMINATE
+        // REQUESTED
         if (shutdownInput.getShutdownReason() == ShutdownReason.TERMINATE) {
             try {
                 shutdownInput.getCheckpointer().checkpoint();

@@ -79,6 +79,7 @@ public class StreamsAdapterDemoHelper {
     public static void putItem(AmazonDynamoDB dynamoDBClient, String tableName,
                                Map<String, AttributeValue> items) {
         PutItemRequest putItemRequest = new PutItemRequest().withTableName(tableName).withItem(items);
+        System.out.println(items);
         dynamoDBClient.putItem(putItemRequest);
     }
 
